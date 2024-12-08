@@ -7,5 +7,22 @@ class gamescene extends Phaser.Scene{
       this.add.image(400, 300, "background");
       this.character = this.add.sprite(50, 285, "character_idle");
       this.add.text(20, 20, "Playing game", {font: "25px Arial", fill: "yellow"});
+
+
+      this.anims.create({
+        key: "run",
+        frames: [
+            { key: "character_run0" },
+            { key: "character_run1" },
+            { key: "character_run2" }
+        ],
+        frameRate: 10, 
+        repeat: -1   
+    });
+
+   
+    this.character.play("run");
     }
+
+    
   }
