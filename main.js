@@ -1,8 +1,9 @@
-const game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload, create });
-
-function preload() {
-}
-
-function create() {
-    game.stage.backgroundColor = '#000000';
-}
+var gameConfig = {
+    width: 800,
+    height: 600,
+    backgroundColor: 0x000000,
+    scene: [preload, gamescene]
+  }
+  
+  
+  var game = new Phaser.Game(gameConfig);
