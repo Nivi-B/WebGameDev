@@ -9,6 +9,8 @@ class gamescene extends Phaser.Scene{
       this.car = this.add.sprite(750, 320, "car");
       this.car.setScale(0.5);
       this.add.text(20, 20, "Playing game", {font: "25px Arial", fill: "yellow"});
+      this.backgroundMusic = this.sound.add('background_music', { loop: true });
+      this.backgroundMusic.play();
 
 
       this.anims.create({
