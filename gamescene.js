@@ -6,6 +6,8 @@ class gamescene extends Phaser.Scene{
     create(){
       this.add.image(400, 300, "background");
       this.character = this.add.sprite(50, 285, "character_idle");
+      this.car = this.add.sprite(750, 320, "car");
+      this.car.setScale(0.5);
       this.add.text(20, 20, "Playing game", {font: "25px Arial", fill: "yellow"});
 
 
@@ -23,6 +25,21 @@ class gamescene extends Phaser.Scene{
    
     this.character.play("run");
     }
+
+    update() {
+      // character movement
+      this.character.x += 2;
+      if (this.character.x > 800) {
+          this.character.x = -50; 
+      }
+
+      // car movement
+      this.car.x -= 2;
+      if (this.car.x < -50) {
+          this.car.x = 850; 
+      }
+
+  }
 
     
   }
