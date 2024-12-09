@@ -90,6 +90,8 @@ class gamescene extends Phaser.Scene{
       this.randomizeCoinPosition(coin);
       coin.setActive(true);
       coin.setVisible(true);
+
+      this.score += 100;
     }
 
     handleCollision(character, car) {
