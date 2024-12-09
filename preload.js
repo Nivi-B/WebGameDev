@@ -14,9 +14,11 @@ class preload extends Phaser.Scene {
       this.load.image("police_car", "assets/police_car.png");
       this.load.image("ambulance", "assets/ambulance.png");
       this.load.image("snowflake", "assets/snowflake.png");
+      this.load.image('coin', 'assets/coin.png');
 
       this.load.audio('background_music', 'assets/audio/background_music.mp3');
 
+      this.load.bitmapFont('customFont', 'assets/font.png', 'assets/font.xml');
       
     }
     create() {
