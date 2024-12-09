@@ -57,6 +57,39 @@ class gamescene extends Phaser.Scene{
       this.physics.add.overlap(this.character, this.car, this.handleCollision, null, this);
 
       this.scoreText = this.add.text(20, 50, `Score: ${this.score}`, { font: "25px Arial", fill: "white" });
+
+      this.coins = this.physics.add.group({
+        key: 'coin',
+        repeat: 3, // Create 4 coins in total
+        setXY: { x: 700, y: 150, stepX: 150 }
+      });
+  
+      // Randomize initial coin positions
+      this.coins.children.iterate((coin) => {
+        coin.setScale(0.2);
+        coin.body.allowGravity = false;
+        this.randomizeCoinPosition(coin);
+      });
+  
+      // Overlap detection for coin collection
+      this.physics.add.overlap(this.character, this.coins, this.collectCoin, null, this);
+    }
+
+    randomizeCoinPosition(coin) {
+      // Set coins to the right of the screen and randomize Y position
+      coin.x = Phaser.Math.Between(650, 800); // Random X position to the right
+      coin.y = Phaser.Math.Between(30, 180); // Random Y position
+    }
+  
+    collectCoin(character, coin) {
+      // Hide coin when collected
+      coin.setActive(false);
+      coin.setVisible(false);
+  
+      // Randomize position and re-enable coin
+      this.randomizeCoinPosition(coin);
+      coin.setActive(true);
+      coin.setVisible(true);
     }
 
     handleCollision(character, car) {
@@ -84,24 +117,32 @@ class gamescene extends Phaser.Scene{
       }
 
       if (this.isJumping) {
-        this.character.y += this.velocityY;  
-        this.velocityY += this.gravity;  
-        if (this.character.y >= 170) {  
-            this.character.y = 170;  
-            this.isJumping = false; 
-            this.character.play('run');
+        this.character.y += this.velocityY;
+        this.velocityY += this.gravity;
+        if (this.character.y >= 170) {
+          this.character.y = 170;
+          this.isJumping = false;
+          this.character.play('run');
         }
       }
-
+  
       // car movement
       this.car.x -= 6;
       if (this.car.x < -50) {
-          this.car.x = 850; 
+        this.car.x = 850;
       }
-
-
-      this.background.tilePositionX -= -5; 
-    }  
-
   
+      this.coins.children.iterate((coin) => {
+        coin.x -= 6; // Move each coin by 6 units per frame
+        if (coin.x < -50) { // Reset coin to the right side when it goes off-screen
+          this.randomizeCoinPosition(coin);
+        }
+      });
+
+
+    this.background.tilePositionX -= -5;
+
   }
+
+
+}
