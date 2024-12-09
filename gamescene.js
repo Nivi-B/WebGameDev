@@ -41,7 +41,24 @@ class gamescene extends Phaser.Scene{
       this.jumpSpeed = -10; 
       this.gravity = 0.5;  
       this.velocityY = 0;
-    
+
+      // Add physics to character and car
+      this.physics.add.existing(this.character);
+      this.physics.add.existing(this.car);
+      
+      // Adjust hitbox size and position to match visual
+      this.character.body.setSize(30, 50); 
+      this.character.body.setOffset(10, 10);
+      this.car.body.setSize(80, 30); 
+      this.car.body.setOffset(5, 10); 
+
+      // Enable collilsion check
+      this.physics.add.overlap(this.character, this.car, this.handleCollision, null, this);
+    }
+
+    handleCollision(character, car) {
+      // Reset car position when collision occurs
+      car.x = 850; // Reset car to the right side of the screen
     }
 
     update() {
@@ -74,10 +91,8 @@ class gamescene extends Phaser.Scene{
       }
 
 
-      this.background.tilePositionX -= -5;
+      this.background.tilePositionX -= -5; 
+    }  
 
   
-}
-
-    
   }
