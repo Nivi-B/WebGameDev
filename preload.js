@@ -14,10 +14,10 @@ class preload extends Phaser.Scene {
       this.load.image("police_car", "assets/police_car.png");
       this.load.image("ambulance", "assets/ambulance.png");
       this.load.image("snowflake", "assets/snowflake.png");
+      this.load.image("power_up", "assets/power_up.png");
 
       this.load.audio('background_music', 'assets/audio/background_music.mp3');
-
-      
+ 
     }
     create() {
       this.add.text(20, 20, "Loading game...");
