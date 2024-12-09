@@ -46,10 +46,10 @@ class gamescene extends Phaser.Scene{
 
     update() {
       // character movement
-      this.character.x += 2;
-      if (this.character.x > 800) {
-          this.character.x = -50; 
-      }
+      //this.character.x += 2;
+      //if (this.character.x > 800) {
+      //    this.character.x = -50; 
+      //}
 
       if (this.spacebar.isDown && !this.isJumping) {
         this.isJumping = true;  
@@ -68,13 +68,13 @@ class gamescene extends Phaser.Scene{
       }
 
       // car movement
-      this.car.x -= 2;
+      this.car.x -= 6;
       if (this.car.x < -50) {
           this.car.x = 850; 
       }
 
 
-      this.background.tilePositionX -= -3;
+      this.background.tilePositionX -= -5;
 
   
 }
