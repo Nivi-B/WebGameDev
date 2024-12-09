@@ -6,7 +6,7 @@ class gamescene extends Phaser.Scene{
     create(){
       this.background = this.add.tileSprite(0, 0, gameConfig.width, gameConfig.height, "background");
       this.background.setOrigin(0, 0);
-      this.character = this.add.sprite(50, 150, "character_idle");
+      this.character = this.add.sprite(50, 170, "character_idle");
       this.character.setScale(0.5);
       this.car = this.add.sprite(750, 185, "car");
       this.car.setScale(0.25);   
@@ -24,10 +24,24 @@ class gamescene extends Phaser.Scene{
         ],
         frameRate: 10, 
         repeat: -1   
-    });
+      });
 
-   
-    this.character.play("run");
+      this.character.play("run");
+      this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+
+      this.anims.create({
+        key: 'jump',
+        frames: [{ key: 'character_jump' }],  
+        frameRate: 10,
+        repeat: 0  
+      });
+
+      this.isJumping = false;
+      this.jumpSpeed = -10; 
+      this.gravity = 0.5;  
+      this.velocityY = 0;
+    
     }
 
     update() {
@@ -37,15 +51,33 @@ class gamescene extends Phaser.Scene{
           this.character.x = -50; 
       }
 
+      if (this.spacebar.isDown && !this.isJumping) {
+        this.isJumping = true;  
+        this.velocityY = this.jumpSpeed; 
+        this.character.play('jump'); 
+      }
+
+      if (this.isJumping) {
+        this.character.y += this.velocityY;  
+        this.velocityY += this.gravity;  
+        if (this.character.y >= 170) {  
+            this.character.y = 170;  
+            this.isJumping = false; 
+            this.character.play('run');
+        }
+      }
+
       // car movement
       this.car.x -= 2;
       if (this.car.x < -50) {
           this.car.x = 850; 
       }
 
+
       this.background.tilePositionX -= -3;
 
-  }
+  
+}
 
     
   }
