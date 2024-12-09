@@ -12,7 +12,7 @@ class gamescene extends Phaser.Scene {
     this.car.setScale(0.25);
     this.add.text(20, 20, "Playing game", { font: "25px Arial", fill: "yellow" });
     this.backgroundMusic = this.sound.add('background_music', { loop: true });
-    // this.backgroundMusic.play();
+    this.backgroundMusic.play();
 
 
     this.anims.create({
