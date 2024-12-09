@@ -12,7 +12,7 @@ class gamescene extends Phaser.Scene{
       this.car.setScale(0.25);   
       this.add.text(20, 20, "Playing game", {font: "25px Arial", fill: "yellow"});
       this.backgroundMusic = this.sound.add('background_music', { loop: true });
-      this.backgroundMusic.play();
+      // this.backgroundMusic.play();
 
 
       this.anims.create({
@@ -54,6 +54,37 @@ class gamescene extends Phaser.Scene{
 
       // Enable collilsion check
       this.physics.add.overlap(this.character, this.car, this.handleCollision, null, this);
+
+      this.coins = this.physics.add.group({
+        key: 'coin', 
+        repeat: 3,  
+        setXY: { x: 500, y: 170, stepX: 150 } 
+      });
+  
+      // Randomize coin positions
+      this.coins.children.iterate((coin) => {
+        coin.setScale(0.2);
+        coin.setImmovable(true); 
+        coin.body.allowGravity = false;
+        this.randomizeCoinPosition(coin);
+      });
+  
+      // Overlap detection for coin collection
+      this.physics.add.overlap(this.character, this.coins, this.collectCoin, null, this);
+    }
+
+    randomizeCoinPosition(coin) {
+      coin.x = Phaser.Math.Between(this.character.x + 50, this.car.x - 50);
+      coin.y = Phaser.Math.Between(170, 300); 
+    }
+  
+    collectCoin(character, coin) {
+      coin.setActive(false);
+      coin.setVisible(false);
+  
+      this.randomizeCoinPosition(coin);
+      coin.setActive(true);
+      coin.setVisible(true);
     }
 
     handleCollision(character, car) {
@@ -92,6 +123,7 @@ class gamescene extends Phaser.Scene{
 
 
       this.background.tilePositionX -= -5; 
+
     }  
 
   
