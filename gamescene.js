@@ -1,6 +1,7 @@
 class gamescene extends Phaser.Scene{
     constructor(){
       super("playGame");
+      this.score = 0;
     }
   
     create(){
@@ -54,11 +55,15 @@ class gamescene extends Phaser.Scene{
 
       // Enable collilsion check
       this.physics.add.overlap(this.character, this.car, this.handleCollision, null, this);
+
+      this.scoreText = this.add.text(20, 50, `Score: ${this.score}`, { font: "25px Arial", fill: "white" });
     }
 
     handleCollision(character, car) {
       // Reset car position when collision occurs
       car.x = 850; // Reset car to the right side of the screen
+      this.score = 0;   // Reset the score
+      this.scoreText.setText(`Score: ${this.score}`); // Update score text
     }
 
     update() {
@@ -67,6 +72,10 @@ class gamescene extends Phaser.Scene{
       //if (this.character.x > 800) {
       //    this.character.x = -50; 
       //}
+
+      // Increment the score every frame
+      this.score++;
+      this.scoreText.setText(`Score: ${this.score}`); // Update score text
 
       if (this.spacebar.isDown && !this.isJumping) {
         this.isJumping = true;  
