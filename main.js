@@ -1,6 +1,6 @@
 var gameConfig = {
-    width: 800,
-    height: 600,
+    width: 600,
+    height: 300,
     backgroundColor: 0x000000,
     scene: [preload, gamescene]
   }

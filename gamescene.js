@@ -4,10 +4,12 @@ class gamescene extends Phaser.Scene{
     }
   
     create(){
-      this.add.image(400, 300, "background");
-      this.character = this.add.sprite(50, 285, "character_idle");
-      this.car = this.add.sprite(750, 320, "car");
-      this.car.setScale(0.5);
+      this.background = this.add.tileSprite(0, 0, gameConfig.width, gameConfig.height, "background");
+      this.background.setOrigin(0, 0);
+      this.character = this.add.sprite(50, 150, "character_idle");
+      this.character.setScale(0.5);
+      this.car = this.add.sprite(750, 185, "car");
+      this.car.setScale(0.25);   
       this.add.text(20, 20, "Playing game", {font: "25px Arial", fill: "yellow"});
       this.backgroundMusic = this.sound.add('background_music', { loop: true });
       this.backgroundMusic.play();
@@ -40,6 +42,8 @@ class gamescene extends Phaser.Scene{
       if (this.car.x < -50) {
           this.car.x = 850; 
       }
+
+      this.background.tilePositionX -= -3;
 
   }
 
