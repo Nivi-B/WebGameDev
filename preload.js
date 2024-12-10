@@ -4,6 +4,7 @@ class preload extends Phaser.Scene {
     }
     preload(){
       this.load.image("background", "assets/background.png");
+      this.load.image("gloomy_background", "assets/gloomy_background.png");
 
       this.load.image("character_idle", "assets/character_idle.png");
       this.load.image("character_run0", "assets/character_run0.png");

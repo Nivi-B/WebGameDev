@@ -7,6 +7,9 @@ class gamescene extends Phaser.Scene{
     create(){
       this.background = this.add.tileSprite(0, 0, gameConfig.width, gameConfig.height, "background");
       this.background.setOrigin(0, 0);
+      this.gloomyBackground = this.add.tileSprite(0, 0, gameConfig.width, gameConfig.height, "gloomy_background");  //added gloomy background
+      this.gloomyBackground.setOrigin(0, 0);
+      this.gloomyBackground.setAlpha(0); // Initially invisible,
       this.character = this.add.sprite(50, 170, "character_idle");
       this.character.setScale(0.5);
       this.car = this.add.sprite(750, 185, "car");
@@ -14,6 +17,27 @@ class gamescene extends Phaser.Scene{
       this.add.text(20, 20, "Playing game", {font: "25px Arial", fill: "yellow"});
       this.backgroundMusic = this.sound.add('background_music', { loop: true });
       this.backgroundMusic.play();
+
+      // Snowflake particles
+      const particles = this.add.particles('snowflake');
+      this.snowEmitter = particles.createEmitter({
+        x: { min: 0, max: gameConfig.width },
+        y: 0,
+        lifespan: 4000,
+        speedY: { min: 50, max: 100 },
+        scale: { start: 0.1, end: 0.5 },
+        quantity: 5,
+        blendMode: 'ADD',
+        active: false, // Initially inactive
+      });
+    
+      // Timer to toggle backgrounds and snowflakes every 25 seconds
+      this.time.addEvent({
+        delay: 25000, // 25 seconds
+        callback: this.toggleBackground,
+        callbackScope: this,
+        loop: true, // Repeat infinitely
+      });
 
 
       this.anims.create({
@@ -73,6 +97,33 @@ class gamescene extends Phaser.Scene{
   
       // Overlap detection for coin collection
       this.physics.add.overlap(this.character, this.coins, this.collectCoin, null, this);
+    }
+
+    // Toggle between backgrounds and snowflakes
+    toggleBackground() {
+      if (this.gloomyBackground.alpha === 0) {
+        // Transition to gloomy background with snowflakes
+        this.tweens.add({
+          targets: this.gloomyBackground,
+          alpha: 1, // Fade in gloomy background
+          duration: 5000, // 5 seconds
+          onUpdate: () => {
+            this.background.setAlpha(1 - this.gloomyBackground.alpha); // Fade out original background
+          },
+        });
+        this.snowEmitter.start(); // Start snowflakes
+      } else {
+        // Transition back to the original background
+        this.tweens.add({
+          targets: this.gloomyBackground,
+          alpha: 0, // Fade out gloomy background
+          duration: 5000, // 5 seconds
+          onUpdate: () => {
+            this.background.setAlpha(1 - this.gloomyBackground.alpha); // Fade in original background
+          },
+        });
+        this.snowEmitter.stop(); // Stop snowflakes
+      }
     }
 
     randomizeCoinPosition(coin) {
