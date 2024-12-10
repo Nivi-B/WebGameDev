@@ -2,77 +2,111 @@ class gamescene extends Phaser.Scene{
     constructor(){
       super("playGame");
       this.score = 0;
+      this.isReady = false;
     }
   
-    create(){
-      this.background = this.add.tileSprite(0, 0, gameConfig.width, gameConfig.height, "background");
-      this.background.setOrigin(0, 0);
-      this.character = this.add.sprite(50, 170, "character_idle");
-      this.character.setScale(0.5);
-      this.car = this.add.sprite(750, 185, "car");
-      this.car.setScale(0.25);   
-      this.add.text(20, 20, "Playing game", {font: "25px Arial", fill: "yellow"});
-      this.backgroundMusic = this.sound.add('background_music', { loop: true });
-      this.backgroundMusic.play();
-
-
-      this.anims.create({
-        key: "run",
-        frames: [
+    async create() {
+      try {
+        // Fetch the weather and set the background
+        const weatherCondition = await this.getWeather();
+        const bgKey = weatherCondition === "clear" ? "background" : "gloomy_background";
+        this.background = this.add.tileSprite(0, 0, gameConfig.width, gameConfig.height, bgKey);
+        this.background.setOrigin(0, 0);
+  
+        // Initialize game elements
+        this.character = this.add.sprite(50, 170, "character_idle");
+        this.character.setScale(0.5);
+        this.car = this.add.sprite(750, 185, "car");
+        this.car.setScale(0.25);
+        this.add.text(20, 20, "Playing game", { font: "25px Arial", fill: "yellow" });
+  
+        // Background music
+        this.backgroundMusic = this.sound.add("background_music", { loop: true });
+        this.backgroundMusic.play();
+  
+        // Animations
+        this.anims.create({
+          key: "run",
+          frames: [
             { key: "character_run0" },
             { key: "character_run1" },
-            { key: "character_run2" }
-        ],
-        frameRate: 10, 
-        repeat: -1   
-      });
-
-      this.character.play("run");
-      this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-
-
-      this.anims.create({
-        key: 'jump',
-        frames: [{ key: 'character_jump' }],  
-        frameRate: 10,
-        repeat: 0  
-      });
-
-      this.isJumping = false;
-      this.jumpSpeed = -10; 
-      this.gravity = 0.5;  
-      this.velocityY = 0;
-
-      // Add physics to character and car
-      this.physics.add.existing(this.character);
-      this.physics.add.existing(this.car);
-      
-      // Adjust hitbox size and position to match visual
-      this.character.body.setSize(30, 50); 
-      this.character.body.setOffset(10, 10);
-      this.car.body.setSize(80, 30); 
-      this.car.body.setOffset(5, 10); 
-
-      // Enable collilsion check
-      this.physics.add.overlap(this.character, this.car, this.handleCollision, null, this);
-
-      this.scoreText = this.add.text(20, 50, `Score: ${this.score}`, { font: "25px Arial", fill: "white" });
-
-      this.coins = this.physics.add.group({
-        key: 'coin',
-        repeat: 3, // Create 4 coins in total
-        setXY: { x: 700, y: 150, stepX: 150 }
-      });
+            { key: "character_run2" },
+          ],
+          frameRate: 10,
+          repeat: -1,
+        });
+        this.anims.create({
+          key: "jump",
+          frames: [{ key: "character_jump" }],
+          frameRate: 10,
+          repeat: 0,
+        });
   
-      // Randomize initial coin positions
-      this.coins.children.iterate((coin) => {
-        coin.setScale(0.2);
-        coin.body.allowGravity = false;
-        this.randomizeCoinPosition(coin);
-      });
+        this.character.play("run");
+        this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
   
-      // Overlap detection for coin collection
-      this.physics.add.overlap(this.character, this.coins, this.collectCoin, null, this);
+        // Physics setup
+        this.isJumping = false;
+        this.jumpSpeed = -10;
+        this.gravity = 0.5;
+        this.velocityY = 0;
+  
+        this.physics.add.existing(this.character);
+        this.physics.add.existing(this.car);
+        this.character.body.setSize(30, 50);
+        this.character.body.setOffset(10, 10);
+        this.car.body.setSize(80, 30);
+        this.car.body.setOffset(5, 10);
+  
+        // Collision and overlaps
+        this.physics.add.overlap(this.character, this.car, this.handleCollision, null, this);
+  
+        // Score display
+        this.scoreText = this.add.text(20, 50, `Score: ${this.score}`, { font: "25px Arial", fill: "white" });
+  
+        // Coins group
+        this.coins = this.physics.add.group({
+          key: "coin",
+          repeat: 3,
+          setXY: { x: 700, y: 150, stepX: 150 },
+        });
+        this.coins.children.iterate((coin) => {
+          coin.setScale(0.2);
+          coin.body.allowGravity = false;
+          this.randomizeCoinPosition(coin);
+        });
+  
+        this.physics.add.overlap(this.character, this.coins, this.collectCoin, null, this);
+      } catch (error) {
+        console.error("Error initializing game:", error);
+      }
+      this.isReady = true;
+    }
+
+    async getWeather() {
+      try {
+        const apiKey = "08a83eb57c04f1d6ddc19f289ffb5a7d"; 
+        const lat = 39.1031; // Cincinnati, OH
+        const lon = 84.5120; // Cincinnati, OH
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+  
+        const response = await fetch(url);
+        const data = await response.json();
+  
+        // Parse the weather condition
+        const weatherCondition = data.weather[0].main.toLowerCase();
+        console.log(`Weather Condition: ${weatherCondition}`);
+  
+        // Return "clear" or "gloomy" based on the weather
+        if (["clear", "sunny"].includes(weatherCondition)) {
+          return "clear";
+        } else {
+          return "gloomy";
+        }
+      } catch (error) {
+        console.error("Error fetching weather data:", error);
+        return "clear"; // Default to clear if API call fails
+      }
     }
 
     randomizeCoinPosition(coin) {
@@ -102,6 +136,7 @@ class gamescene extends Phaser.Scene{
     }
 
     update() {
+      if (!this.isReady) return;
       // character movement
       //this.character.x += 2;
       //if (this.character.x > 800) {
