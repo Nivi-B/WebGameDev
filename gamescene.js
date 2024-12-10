@@ -13,7 +13,9 @@ class gamescene extends Phaser.Scene{
       this.car.setScale(0.25);   
       this.add.text(20, 20, "Playing game", {font: "25px Arial", fill: "yellow"});
       this.backgroundMusic = this.sound.add('background_music', { loop: true });
-      this.backgroundMusic.play();
+      this.backgroundMusic.play({ volume: 0.2 });
+      this.coinSound = this.sound.add('coin_sound');
+
 
 
       this.anims.create({
@@ -82,6 +84,7 @@ class gamescene extends Phaser.Scene{
     }
   
     collectCoin(character, coin) {
+      this.coinSound.play({ volume: 2.0 });
       // Hide coin when collected
       coin.setActive(false);
       coin.setVisible(false);
