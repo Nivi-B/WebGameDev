@@ -22,6 +22,7 @@ class preload extends Phaser.Scene {
 
 
       this.load.audio('background_music', 'assets/audio/background_music.mp3');
+      this.load.audio('coin_sound', 'assets/audio/coin_sound.wav');
  
     }
     create() {

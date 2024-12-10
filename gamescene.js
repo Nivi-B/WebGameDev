@@ -2,6 +2,7 @@ class gamescene extends Phaser.Scene{
     constructor(){
       super("playGame");
       this.score = 0;
+      this.scoreMultiplier = 1;
       this.isReady = false;
     }
   
@@ -22,61 +23,72 @@ class gamescene extends Phaser.Scene{
   
         // Background music
         this.backgroundMusic = this.sound.add("background_music", { loop: true });
-        this.backgroundMusic.play();
-  
+        this.backgroundMusic.play({ volume: 0.2 });
+        this.coinSound = this.sound.add('coin_sound');
+
+      this.coins = this.physics.add.group({
+        key: 'coin',
+        repeat: 3, // Create 4 coins in total
+        setXY: { x: 700, y: 150, stepX: 150 }
+      });
+
+      this.powerUp = this.physics.add.sprite(700, 150, 'power_up');
+      this.powerUp.setScale(0.1);
+      this.powerUp.body.allowGravity = false;
+      this.randomizePowerUpPosition(this.powerUp);
         // Animations
         this.anims.create({
           key: "run",
           frames: [
             { key: "character_run0" },
             { key: "character_run1" },
-            { key: "character_run2" },
-          ],
-          frameRate: 10,
-          repeat: -1,
-        });
-        this.anims.create({
-          key: "jump",
-          frames: [{ key: "character_jump" }],
-          frameRate: 10,
-          repeat: 0,
-        });
-  
-        this.character.play("run");
-        this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-  
-        // Physics setup
-        this.isJumping = false;
-        this.jumpSpeed = -10;
-        this.gravity = 0.5;
-        this.velocityY = 0;
-  
-        this.physics.add.existing(this.character);
-        this.physics.add.existing(this.car);
-        this.character.body.setSize(30, 50);
-        this.character.body.setOffset(10, 10);
-        this.car.body.setSize(80, 30);
-        this.car.body.setOffset(5, 10);
-  
-        // Collision and overlaps
-        this.physics.add.overlap(this.character, this.car, this.handleCollision, null, this);
-  
-        // Score display
-        this.scoreText = this.add.text(20, 50, `Score: ${this.score}`, { font: "25px Arial", fill: "white" });
-  
-        // Coins group
-        this.coins = this.physics.add.group({
-          key: "coin",
-          repeat: 3,
-          setXY: { x: 700, y: 150, stepX: 150 },
-        });
-        this.coins.children.iterate((coin) => {
-          coin.setScale(0.2);
-          coin.body.allowGravity = false;
-          this.randomizeCoinPosition(coin);
-        });
+            { key: "character_run2" }
+        ],
+        frameRate: 10, 
+        repeat: -1   
+      });
+
+      this.character.play("run");
+      this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+
+      this.anims.create({
+        key: 'jump',
+        frames: [{ key: 'character_jump' }],  
+        frameRate: 10,
+        repeat: 0  
+      });
+
+      this.isJumping = false;
+      this.jumpSpeed = -10; 
+      this.gravity = 0.5;  
+      this.velocityY = 0;
+
+      // Add physics to character and car
+      this.physics.add.existing(this.character);
+      this.physics.add.existing(this.car);
+      
+      // Adjust hitbox size and position to match visual
+      this.character.body.setSize(30, 50); 
+      this.character.body.setOffset(10, 10);
+      this.car.body.setSize(80, 30); 
+      this.car.body.setOffset(5, 10); 
+
+      // Enable collilsion check
+      this.physics.add.overlap(this.character, this.car, this.handleCollision, null, this);
+
+      this.scoreText = this.add.text(20, 50, `Score: ${this.score}`, { font: "25px Arial", fill: "white" });
+
+      // Randomize initial coin positions
+      this.coins.children.iterate((coin) => {
+        coin.setScale(0.2);
+        coin.body.allowGravity = false;
+        this.randomizeCoinPosition(coin);
+      });
   
         this.physics.add.overlap(this.character, this.coins, this.collectCoin, null, this);
+
+      this.physics.add.overlap(this.character, this.powerUp, this.collectPowerUp, null, this);
       } catch (error) {
         console.error("Error initializing game:", error);
       }
@@ -114,8 +126,15 @@ class gamescene extends Phaser.Scene{
       coin.x = Phaser.Math.Between(650, 800); // Random X position to the right
       coin.y = Phaser.Math.Between(30, 180); // Random Y position
     }
+
+    randomizePowerUpPosition(powerUp) {
+      // Randomize position for the power-up
+      powerUp.x = Phaser.Math.Between(4000, 5000); 
+      powerUp.y = Phaser.Math.Between(40, 180); 
+    }
   
     collectCoin(character, coin) {
+      this.coinSound.play({ volume: 2.0 });
       // Hide coin when collected
       coin.setActive(false);
       coin.setVisible(false);
@@ -125,7 +144,31 @@ class gamescene extends Phaser.Scene{
       coin.setActive(true);
       coin.setVisible(true);
 
-      this.score += 100;
+      this.score += (100 * this.scoreMultiplier);
+    }
+
+    collectPowerUp(character, powerUp) {
+  
+      // Hide power-up when collected
+      powerUp.setActive(false);
+      powerUp.setVisible(false);
+  
+      // Randomize position and re-enable power-up
+      this.randomizePowerUpPosition(powerUp);
+      powerUp.setActive(true);
+      powerUp.setVisible(true);
+  
+      // Double the score multiplier
+      this.scoreMultiplier = 10;
+  
+      // Reset multiplier after 5 seconds
+      this.time.addEvent({
+        delay: 5000,  // Duration in milliseconds (5 seconds)
+        callback: () => {
+          this.scoreMultiplier = 1;  // Reset to normal multiplier
+        },
+        callbackScope: this
+      });
     }
 
     handleCollision(character, car) {
@@ -144,7 +187,7 @@ class gamescene extends Phaser.Scene{
       //}
 
       // Increment the score every frame
-      this.score++;
+      this.score += (1 * this.scoreMultiplier);
       this.scoreText.setText(`Score: ${this.score}`); // Update score text
 
       if (this.spacebar.isDown && !this.isJumping) {
@@ -176,6 +219,10 @@ class gamescene extends Phaser.Scene{
         }
       });
 
+      this.powerUp.x -= 6;
+      if (this.powerUp.x < -50) {
+        this.randomizePowerUpPosition(this.powerUp);
+      }
 
     this.background.tilePositionX -= -5;
 
