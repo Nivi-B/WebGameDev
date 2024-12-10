@@ -2,6 +2,7 @@ class gamescene extends Phaser.Scene{
     constructor(){
       super("playGame");
       this.score = 0;
+      this.scoreMultiplier = 1;
     }
   
     create(){
@@ -16,7 +17,16 @@ class gamescene extends Phaser.Scene{
       this.backgroundMusic.play({ volume: 0.2 });
       this.coinSound = this.sound.add('coin_sound');
 
+      this.coins = this.physics.add.group({
+        key: 'coin',
+        repeat: 3, // Create 4 coins in total
+        setXY: { x: 700, y: 150, stepX: 150 }
+      });
 
+      this.powerUp = this.physics.add.sprite(700, 150, 'power_up');
+      this.powerUp.setScale(0.1);
+      this.powerUp.body.allowGravity = false;
+      this.randomizePowerUpPosition(this.powerUp);
 
       this.anims.create({
         key: "run",
@@ -60,12 +70,6 @@ class gamescene extends Phaser.Scene{
 
       this.scoreText = this.add.text(20, 50, `Score: ${this.score}`, { font: "25px Arial", fill: "white" });
 
-      this.coins = this.physics.add.group({
-        key: 'coin',
-        repeat: 3, // Create 4 coins in total
-        setXY: { x: 700, y: 150, stepX: 150 }
-      });
-  
       // Randomize initial coin positions
       this.coins.children.iterate((coin) => {
         coin.setScale(0.2);
@@ -75,12 +79,20 @@ class gamescene extends Phaser.Scene{
   
       // Overlap detection for coin collection
       this.physics.add.overlap(this.character, this.coins, this.collectCoin, null, this);
+
+      this.physics.add.overlap(this.character, this.powerUp, this.collectPowerUp, null, this);
     }
 
     randomizeCoinPosition(coin) {
       // Set coins to the right of the screen and randomize Y position
       coin.x = Phaser.Math.Between(650, 800); // Random X position to the right
       coin.y = Phaser.Math.Between(30, 180); // Random Y position
+    }
+
+    randomizePowerUpPosition(powerUp) {
+      // Randomize position for the power-up
+      powerUp.x = Phaser.Math.Between(4000, 5000); 
+      powerUp.y = Phaser.Math.Between(40, 180); 
     }
   
     collectCoin(character, coin) {
@@ -94,7 +106,31 @@ class gamescene extends Phaser.Scene{
       coin.setActive(true);
       coin.setVisible(true);
 
-      this.score += 100;
+      this.score += (100 * this.scoreMultiplier);
+    }
+
+    collectPowerUp(character, powerUp) {
+  
+      // Hide power-up when collected
+      powerUp.setActive(false);
+      powerUp.setVisible(false);
+  
+      // Randomize position and re-enable power-up
+      this.randomizePowerUpPosition(powerUp);
+      powerUp.setActive(true);
+      powerUp.setVisible(true);
+  
+      // Double the score multiplier
+      this.scoreMultiplier = 10;
+  
+      // Reset multiplier after 5 seconds
+      this.time.addEvent({
+        delay: 5000,  // Duration in milliseconds (5 seconds)
+        callback: () => {
+          this.scoreMultiplier = 1;  // Reset to normal multiplier
+        },
+        callbackScope: this
+      });
     }
 
     handleCollision(character, car) {
@@ -112,7 +148,7 @@ class gamescene extends Phaser.Scene{
       //}
 
       // Increment the score every frame
-      this.score++;
+      this.score += (1 * this.scoreMultiplier);
       this.scoreText.setText(`Score: ${this.score}`); // Update score text
 
       if (this.spacebar.isDown && !this.isJumping) {
@@ -144,6 +180,10 @@ class gamescene extends Phaser.Scene{
         }
       });
 
+      this.powerUp.x -= 6;
+      if (this.powerUp.x < -50) {
+        this.randomizePowerUpPosition(this.powerUp);
+      }
 
     this.background.tilePositionX -= -5;
 
